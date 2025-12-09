@@ -20,7 +20,6 @@ export async function POST(req) {
 
     const result = records.map((r) => ({
       ...r,
-      processed: true,
     }));
 
     return NextResponse.json({ result });

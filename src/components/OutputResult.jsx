@@ -1,7 +1,82 @@
-
+import {Chart as Chartjs} from "chart.js/auto"
+import {Bar,Doughnut,Line} from "react-chartjs-2"
 const OutputResult = ({data}) => {
+  let res = data["questions"]
+  const filtered = res;
   return (
-    <div>{JSON.stringify(data)}</div>
+    <div >
+  {filtered.map((q, i) => {
+    if(q.type ==="ordered_single_choice"){
+    return (
+      <div key={i}>
+        <div>Question: {q.question}</div>
+        <div>Type: {q.type}</div>
+        <ul>Stats:
+          <li>Average: {q.stats.average}</li>
+          <li>Median: {q.stats.median}</li>
+          <li>Mode: {q.stats.mode}</li>
+        </ul>
+        <div className="w-100">
+          <Doughnut data = {{
+            labels: Object.keys(q.distribution),
+            datasets: [
+              {
+                label: "Total Responses",
+                data: Object.values(q.distribution)
+               }]
+          }}/>
+        </div>
+      </div>
+    
+  )
+}
+else if(q.type === "categorical_single_choice") {
+  return (
+  <div key={i}>
+        <div>Question: {q.question}</div>
+        <div>Type: {q.type}</div>
+        <div className="w-100">
+          <Doughnut data = {{
+            labels: Object.keys(q.distribution),
+            datasets: [
+              {
+                label: "Total Responses",
+                data: Object.values(q.distribution)
+               }]
+          }}/>
+        </div>
+      </div>
+  )
+}
+else if(q.type === "multi_choice") {
+  return (
+  <div key={i}>
+        <div>Question: {q.question}</div>
+        <div>Type: {q.type}</div>
+        <div className="w-100">
+          <Doughnut data = {{
+            labels: Object.keys(q.distribution),
+            datasets: [
+              {
+                label: "Total Responses",
+                data: Object.values(q.distribution)
+               }]
+          }}/>
+        </div>
+      </div>
+  )
+}
+else {
+  return (
+  <div key={i}>
+        <div>Question: {q.question}</div>
+        <div>Type: {q.type}</div>
+      </div>
+  )
+}
+  })}
+</div>
+
   )
 }
 

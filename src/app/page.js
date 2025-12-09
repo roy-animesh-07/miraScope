@@ -2,7 +2,6 @@
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useState } from "react";
-import processData from "@/lib/processData";
 import OutputResult from "@/components/OutputResult";
 
 
@@ -25,10 +24,15 @@ export default function Home() {
     });
 
     const data = await res.json();
-    const finalres = await processData(data);
+
+    const finalres = await fetch("/api/process", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const processed = await finalres.json();
     setShowData(true);
-    setResult(finalres);
-    console.log("Processed Result:", data);
+    setResult(processed);
   };
 
   return (

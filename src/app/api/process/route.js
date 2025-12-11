@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-
+// import {vader} from "vader-sentiment"
+const vader = require('vader-sentiment');
 const ai = new GoogleGenAI({});
 
 async function qtypebygpt(freq) {
@@ -52,7 +53,6 @@ async function qtypebygpt(freq) {
   // });
 
   // return JSON.parse(response.text());
-  console.log(prompt);
   const response = [
     { question: "Timestamp", type: "timestamp" },
     {
@@ -158,10 +158,17 @@ export async function POST(req) {
   for (let question of questions) {
     if (question.type === "text") {
       question.responses = Object.keys(freq[question.question]);
+      let pos = 0,neg =0,net =0;
+      for(let res of question.responses) {
+        const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(res);
+        if(intensity.compound>=0.05) pos+=1;
+        else if(intensity.compound>=-0.05) net+=1;
+        else neg+=1;
+      }
       question.sentiment = {
-        positive: 5,
-        neutral: 1,
-        negative: 0,
+        positive: pos,
+        neutral: net,
+        negative: neg,
       };
       question.theme = [
         { theme: "qwert1", quote: "ksfjkdjf" },

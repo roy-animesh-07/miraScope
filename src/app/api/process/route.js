@@ -2,6 +2,63 @@ import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 // import {vader} from "vader-sentiment"
 const vader = require('vader-sentiment');
+const customStopwords = new Set([
+  "the","is","are","was","were","am","i","you","we","they","he","she","it",
+  "and","or","but","if","in","on","at","to","for","of","a","an",
+  "this","that","those","these","with","from","as","by","be","been","being",
+  "had","has","have","having",
+  "very","really","also","just","so","too","not","only","quite","pretty",
+  "do","does","did","doing","done",
+  "can","could","should","would","will","may","might","must","shall",
+  "there","here","where","when","how","why","what","which","who","whom",
+  "all","any","each","every","both","few","many","most","some","such",
+  "nothing","none","something","everything","anything",
+  "specific","generally","general","overall",
+  "good","great","better","best","nice","fine","okay","ok","well",
+  "amazing","awesome","perfect",
+  "easy","hard","difficult","simple","big","small","new","old","early","late",
+  "first","last","next",
+  "day","time","thing","things","stuff","place","area","part","lot","bit",
+  "kind","type","way",
+  "want","wanted","wants",
+  "need","needs","needed",
+  "like","likes","liked",
+  "love","loved",
+  "hate","hated",
+  "come","comes","came",
+  "go","goes","went",
+  "get","gets","got","getting",
+  "make","makes","made",
+  "give","gives","gave","given",
+  "take","takes","took","taken",
+  "provide","provides","provided","providing",
+  "say","says","said",
+  "tell","tells","told",
+  "think","thinks","thought",
+  "feel","feels","felt",
+  "seem","seems","seemed",
+  "look","looks","looked",
+  "see","sees","saw","seen",
+  "use","uses","used","using",
+  "event","session","experience","activity","program","meeting","workshop",
+  "more","less","enough","lots","plenty","several",
+  "about","around","along","across","through","throughout","during","while",
+  "against",
+  "somehow","somewhat","somewhere","sometimes",
+  "yes","no","maybe","sure","please","thanks","thank","appreciated",
+  "however","therefore","although","though","even","yet","still",
+  "because","since","unless","until",
+  
+  // your new removable junk words seen in output
+  "mind","comes","would","should","could","all","there","about","needs"
+]);
+
+function cleanWord(word) {
+  word = word.toLowerCase();
+  if (customStopwords.has(word)) return null;
+  if (word.length <= 2) return null;
+  return word;
+}
 const ai = new GoogleGenAI({});
 
 async function qtypebygpt(freq) {
@@ -53,87 +110,45 @@ async function qtypebygpt(freq) {
   // });
 
   // return JSON.parse(response.text());
+  // console.log(prompt);
   const response = [
-    { question: "Timestamp", type: "timestamp" },
-    {
-      question: "What is the name of the movie you are reviewing?",
-      type: "text",
-    },
-    { question: "On which date did you watch this movie?", type: "timestamp" },
-    { question: "What time did the movie viewing begin?", type: "timestamp" },
-    {
-      question: "How long was the movie's total running time?",
-      type: "duration",
-    },
-    {
-      question: "Overall, how would you rate this movie?",
-      type: "ordered_single_choice",
-    },
-    {
-      question: "How did you feel about the acting quality?",
-      type: "ordered_single_choice",
-    },
-    {
-      question:
-        "Which genres best describe this movie? (Select all that apply)",
-      type: "multi_choice",
-    },
-    {
-      question: "Who was your favorite character in the movie?",
-      type: "categorical_single_choice",
-    },
-    {
-      question:
-        "If you selected 'Other' above, please specify your favorite character's role.",
-      type: "text",
-    },
-    {
-      question: "Would you recommend this movie to a friend?",
-      type: "ordered_single_choice",
-    },
-    {
-      question:
-        "Rate the following aspects of the movie: [Story/Plot Originality]",
-      type: "ordered_single_choice",
-    },
-    {
-      question:
-        "Rate the following aspects of the movie: [Visual Effects (VFX)]",
-      type: "ordered_single_choice",
-    },
-    {
-      question: "Rate the following aspects of the movie: [Soundtrack/Score]",
-      type: "ordered_single_choice",
-    },
-    {
-      question: "Rate the following aspects of the movie: [Pacing/Editing]",
-      type: "ordered_single_choice",
-    },
-    {
-      question:
-        "Which elements did you find compelling and/or disappointing? [Action Scenes]",
-      type: "multi_choice",
-    },
-    {
-      question:
-        "Which elements did you find compelling and/or disappointing? [Dialogue]",
-      type: "multi_choice",
-    },
-    {
-      question:
-        "Which elements did you find compelling and/or disappointing? [Costume Design]",
-      type: "multi_choice",
-    },
-    {
-      question:
-        "Which elements did you find compelling and/or disappointing? [Cinematography (Camera work)]",
-      type: "multi_choice",
-    },
-    {
-      question: "Share your overall review and final comments on the movie.",
-      type: "text",
-    },
-  ];
+  {
+    "question": "Timestamp",
+    "type": "timestamp"
+  },
+  {
+    "question": "Email Address",
+    "type": "text"
+  },
+  {
+    "question": "Full Name",
+    "type": "text"
+  },
+  {
+    "question": "Overall Satisfaction (1-5)",
+    "type": "ordered_single_choice"
+  },
+  {
+    "question": "Statement: \"The event met my expectations\"",
+    "type": "categorical_single_choice"
+  },
+  {
+    "question": "What did you like most?",
+    "type": "text"
+  },
+  {
+    "question": "What could be improved?",
+    "type": "text"
+  },
+  {
+    "question": "Would you attend next year?",
+    "type": "categorical_single_choice"
+  },
+  {
+    "question": "How did you hear about us?",
+    "type": "categorical_single_choice"
+  }
+];
 
   return JSON.parse(JSON.stringify(response));
 }
@@ -144,7 +159,8 @@ async function processColumn(freq) {
 
 export async function POST(req) {
   const data = await req.json();
-  const infos = [...data.result];
+  const infos = [...data.result];//har ek response ka array[{phele res},{dusra res}....]
+  //info[0] is a obj
   const freq = {};
   for (let key in infos[0]) {
     const mp = new Map();
@@ -159,22 +175,58 @@ export async function POST(req) {
     if (question.type === "text") {
       question.responses = Object.keys(freq[question.question]);
       let pos = 0,neg =0,net =0;
+      const mp = new Map();
       for(let res of question.responses) {
         const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(res);
-        if(intensity.compound>=0.05) pos+=1;
-        else if(intensity.compound>=-0.05) net+=1;
-        else neg+=1;
+        if(intensity.compound>=0.05) pos+=freq[question.question][res];
+        else if(intensity.compound>=-0.05) net+=freq[question.question][res];
+        else neg+=freq[question.question][res];
+
+        let words = res.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(" ").filter(Boolean);
+        const currMp = new Map();
+        for(let word of words) {
+          if(!currMp.has(word)) {
+            currMp.set(word,freq[question.question][res]);
+            mp.set(word,(mp.get(word) || 0) + freq[question.question][res]);
+          }
+          else {
+            currMp.set(word,(currMp.get(word) || 0) + freq[question.question][res]);
+          }
+        }
       }
+      const wordScore = {};
+      for(let res of question.responses) {
+        let words = res.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(" ").filter(Boolean);
+        const currMp = new Map();
+        for(let word of words) {
+            currMp.set(word,(currMp.get(word) || 0) + 1);
+        }
+        const wordsf = Object.fromEntries(currMp);
+        const uni_words = Object.keys(wordsf);
+        for(let word of uni_words) {
+          const tf = currMp.get(word) / (words.length);
+          const idf = Math.log((infos.length)/(mp.get(word)));
+          const score = tf*idf * freq[question.question][res];
+          if(cleanWord(word)){
+            wordScore[word] = (wordScore[word]||0) + score;
+          }
+          
+        }
+      }
+      const all_themes = Object.entries(wordScore)
+                                .sort((a, b) => b[1] - a[1])
+                                .slice(0, 5)
+                                .map(([word]) => word);
+      question.theme = all_themes.map(w => ({
+      theme: w,
+      quote: question.responses.find(r => r.toLowerCase().includes(w)) || ""
+    }));
+
       question.sentiment = {
         positive: pos,
         neutral: net,
         negative: neg,
       };
-      question.theme = [
-        { theme: "qwert1", quote: "ksfjkdjf" },
-        { theme: "qwert2", quote: "ksfjkdjf" },
-        { theme: "qwert3", quote: "ksfjkdjf" },
-      ];
     }
     if (question.type === "ordered_single_choice") {
       const dist = freq[question.question];

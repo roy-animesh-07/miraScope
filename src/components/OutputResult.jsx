@@ -116,6 +116,9 @@ else if(q.type === "text") {
           Neutral: {q.sentiment.neutral}<br/>
           Negative: {q.sentiment.negative}<br/>
           </div>
+          <div>
+            {JSON.stringify(q.theme)}
+          </div>
       </div>
   )
 }

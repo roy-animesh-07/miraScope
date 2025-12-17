@@ -36,12 +36,12 @@ Input data:
 ${JSON.stringify(report_data)}
 `;
 
-//   const response = await ai.models.generateContent({
-//     model: "gemini-2.5-flash-lite",
-//     contents: prompt,
-//   });
+  // const response = await ai.models.generateContent({
+  //   model: "gemini-2.5-flash-lite",
+  //   contents: prompt,
+  // });
 
-//   return JSON.parse(response.text());
+  // return JSON.parse(response.text);
 const response = [
 {
 "action": "Reduce overt sales pitching in sessions and enforce a content guideline where the majority of each talk is educational, with sales material limited to a short dedicated segment.",

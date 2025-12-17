@@ -72,7 +72,7 @@ ${JSON.stringify(questionsArr)}
   //   contents: prompt,
   // });
 
-  // return JSON.parse(response.text());
+  // return JSON.parse(response.text);
   // console.log(prompt);
   const response = [
   {

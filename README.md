@@ -147,8 +147,3 @@ Contributions welcome — open an issue or a PR with clear steps or a failing te
 
 ---
 
-##  License
-
-Specify a license (e.g., MIT) by adding a `LICENSE` file.
-
----

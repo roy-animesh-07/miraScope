@@ -7,6 +7,7 @@ import actionsPredictor from "./actionsPredictor";
 import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
+import { encrypt, decrypt } from "@/lib/crypto";
 
 export async function POST(req) {
   const session = await getServerSession();
@@ -19,11 +20,16 @@ export async function POST(req) {
   if(session) {
     await connectToDatabase();
     const user = await User.findOne({ email: session.user.email })
-    if (user?.apiKey) {
-      apiKey = user.apiKey;
+    const hasKey = Boolean(user.apikey?.content);
+
+    if (hasKey) {
+      apiKey = decrypt(user.apikey);
     }
     else {
-      user.apikey = apiKey;
+      if (!apiKey) {
+        throw new Error("API key missing");
+      }
+      user.apikey = encrypt(apiKey);
       await user.save();
     }
   }

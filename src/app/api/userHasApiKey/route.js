@@ -15,9 +15,9 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    const result = user.apikey !== "";
+    const result = Boolean(user.apikey?.content);
 
-    return NextResponse.json({apikey:user.apikey , hasKey:result});
+    return NextResponse.json({hasKey:result});
   } catch (err) {
     console.error("GET User error:", err);
     return NextResponse.json(

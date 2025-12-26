@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import User from "@/models/User";
+import { encrypt } from "@/lib/crypto";
 
 export async function POST(req) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    user.apikey = data.apiKey;
+    user.apikey = encrypt(data.apiKey);
     await user.save();
 
     return NextResponse.json({ success: true });
